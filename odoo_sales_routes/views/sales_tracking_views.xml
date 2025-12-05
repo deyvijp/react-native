@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sales_tracking_list" model="ir.ui.view">
+        <field name="name">sales.tracking.list</field>
+        <field name="model">sales.tracking</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="timestamp"/>
+                <field name="user_id"/>
+                <field name="latitude"/>
+                <field name="longitude"/>
+                <field name="speed"/>
+                <field name="battery_level"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="action_sales_tracking" model="ir.actions.act_window">
+        <field name="name">Tracking Logs</field>
+        <field name="res_model">sales.tracking</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <menuitem id="menu_sales_tracking" name="Tracking Logs" parent="menu_sales_route_root" action="action_sales_tracking"/>
+</odoo>

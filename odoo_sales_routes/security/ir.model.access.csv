@@ -1,0 +1,4 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_sales_route,sales.route,model_sales_route,base.group_user,1,1,1,1
+access_sales_route_line,sales.route.line,model_sales_route_line,base.group_user,1,1,1,1
+access_sales_tracking,sales.tracking,model_sales_tracking,base.group_user,1,1,1,1
