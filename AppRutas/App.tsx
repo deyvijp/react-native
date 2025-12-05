@@ -1,17 +1,12 @@
 import React from 'react';
-import {
-  SafeAreaView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { SafeAreaView, StatusBar, StyleSheet } from 'react-native';
+import LoginScreen from './src/screens/LoginScreen';
 
 function App(): React.JSX.Element {
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.content}>
-        <Text style={styles.text}>Hello World</Text>
-      </View>
+      <StatusBar barStyle="dark-content" backgroundColor="#f5f7fa" />
+      <LoginScreen />
     </SafeAreaView>
   );
 }
@@ -19,18 +14,7 @@ function App(): React.JSX.Element {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#fff',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  content: {
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  text: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
+    backgroundColor: '#f5f7fa',
   },
 });
 
