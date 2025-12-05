@@ -1,21 +1,18 @@
-// Configuration - REPLACE WITH YOUR ACTUAL SERVER DETAILS
-export const ODOO_CONFIG = {
-    url: 'http://20.12.240.8:8069', // Note: HTTP is insecure for passwords. Use HTTPS in production.
-    db: 'v18',
-};
+import { ENV } from '../config/env';
+import { OdooRpcRequest, OdooRpcResponse, LoginResult } from '../types/odoo';
 
-export const login = async (username: string, password: string): Promise<any> => {
+export const login = async (username: string, password: string): Promise<LoginResult> => {
     // Remove trailing slash if present to avoid double slashes
-    const baseUrl = ODOO_CONFIG.url.replace(/\/$/, '');
+    const baseUrl = ENV.ODOO_URL.replace(/\/$/, '');
     const url = `${baseUrl}/jsonrpc`;
 
-    const payload = {
+    const payload: OdooRpcRequest = {
         jsonrpc: '2.0',
         method: 'call',
         params: {
             service: 'common',
             method: 'login',
-            args: [ODOO_CONFIG.db, username, password],
+            args: [ENV.ODOO_DB, username, password],
         },
         id: Math.floor(Math.random() * 1000000000),
     };
@@ -29,14 +26,14 @@ export const login = async (username: string, password: string): Promise<any> =>
             body: JSON.stringify(payload),
         });
 
-        const result = await response.json();
+        const result: OdooRpcResponse<number | false> = await response.json();
 
         if (result.error) {
             throw new Error(result.error.data.message || result.error.message);
         }
 
-        // result.result contains the UID if successful, or false if failed
-        if (result.result) {
+        // Odoo returns the UID (number) on success, or false (boolean) on failure
+        if (typeof result.result === 'number') {
             return {
                 success: true,
                 uid: result.result,
@@ -55,3 +52,4 @@ export const login = async (username: string, password: string): Promise<any> =>
         };
     }
 };
+
