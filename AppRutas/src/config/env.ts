@@ -4,6 +4,6 @@ import { ODOO_URL, ODOO_DB } from '@env';
 // to load these from a .env file.
 
 export const ENV = {
-    ODOO_URL,
-    ODOO_DB,
+    ODOO_URL: ODOO_URL || "https://ringtones-occupation-adventures-sends.trycloudflare.com",
+    ODOO_DB: ODOO_DB || "v18",
 };

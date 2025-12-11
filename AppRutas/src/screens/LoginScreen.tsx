@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
     StyleSheet,
     Text,
@@ -9,15 +9,30 @@ import {
     Platform,
     ActivityIndicator,
     Alert,
+    Keyboard,
+    TouchableWithoutFeedback,
+    ScrollView,
 } from 'react-native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import { RootStackParamList } from '../navigation/types';
 import { login } from '../services/auth';
 
-const LoginScreen = () => {
+type Props = {
+    navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
+};
+
+const LoginScreen = ({ navigation }: Props) => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
+    // Reference to password input for focus chaining
+    const passwordInputRef = useRef<TextInput>(null);
+
     const handleLogin = async () => {
+        // Dismiss keyboard first for better UX
+        Keyboard.dismiss();
+
         if (!email || !password) {
             Alert.alert('Error', 'Por favor ingresa usuario y contraseña');
             return;
@@ -29,8 +44,8 @@ const LoginScreen = () => {
             setLoading(false);
 
             if (result.success) {
-                Alert.alert('Éxito', `Login correcto. UID: ${result.uid}`);
-                // TODO: Navigate to Home Screen
+                // Alert.alert('Éxito', `Login correcto. UID: ${result.uid}`);
+                navigation.replace('Home', { username: result.username || 'Usuario' });
             } else {
                 Alert.alert('Error', result.error || 'Credenciales inválidas');
             }
@@ -39,78 +54,91 @@ const LoginScreen = () => {
             Alert.alert('Error', 'Ocurrió un error inesperado');
         }
     };
-
+    // ... rest of component stays same until return
     return (
         <KeyboardAvoidingView
             behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
             style={styles.container}
         >
-            <View style={styles.contentContainer}>
-                <View style={styles.logoContainer}>
-                    {/* Placeholder for Logo */}
-                    <View style={styles.logoPlaceholder}>
-                        <Text style={styles.logoText}>APP</Text>
-                    </View>
-                    <Text style={styles.title}>Bienvenido</Text>
-                    <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
-                </View>
-
-                <View style={styles.formContainer}>
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Usuario / Email</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="ejemplo@empresa.com"
-                            placeholderTextColor="#999"
-                            value={email}
-                            onChangeText={setEmail}
-                            autoCapitalize="none"
-                            keyboardType="email-address"
-                        />
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+                <ScrollView
+                    contentContainerStyle={styles.scrollContent}
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
+                >
+                    <View style={styles.logoContainer}>
+                        {/* Placeholder for Logo */}
+                        <View style={styles.logoPlaceholder}>
+                            <Text style={styles.logoText}>APP</Text>
+                        </View>
+                        <Text style={styles.title}>Bienvenido</Text>
+                        <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
                     </View>
 
-                    <View style={styles.inputContainer}>
-                        <Text style={styles.label}>Contraseña</Text>
-                        <TextInput
-                            style={styles.input}
-                            placeholder="••••••••"
-                            placeholderTextColor="#999"
-                            value={password}
-                            onChangeText={setPassword}
-                            secureTextEntry
-                        />
+                    <View style={styles.formContainer}>
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Usuario / Email</Text>
+                            <TextInput
+                                style={styles.input}
+                                placeholder="ejemplo@empresa.com"
+                                placeholderTextColor="#999"
+                                value={email}
+                                onChangeText={setEmail}
+                                autoCapitalize="none"
+                                keyboardType="email-address"
+                                returnKeyType="next"
+                                blurOnSubmit={false}
+                                onSubmitEditing={() => passwordInputRef.current?.focus()}
+                            />
+                        </View>
+
+                        <View style={styles.inputContainer}>
+                            <Text style={styles.label}>Contraseña</Text>
+                            <TextInput
+                                ref={passwordInputRef}
+                                style={styles.input}
+                                placeholder="••••••••"
+                                placeholderTextColor="#999"
+                                value={password}
+                                onChangeText={setPassword}
+                                secureTextEntry
+                                returnKeyType="done"
+                                onSubmitEditing={handleLogin}
+                            />
+                        </View>
+
+                        <TouchableOpacity style={styles.forgotButton}>
+                            <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity
+                            style={[styles.loginButton, loading && styles.loginButtonDisabled]}
+                            onPress={handleLogin}
+                            disabled={loading}
+                        >
+                            {loading ? (
+                                <ActivityIndicator color="#fff" />
+                            ) : (
+                                <Text style={styles.loginButtonText}>INICIAR SESIÓN</Text>
+                            )}
+                        </TouchableOpacity>
                     </View>
-
-                    <TouchableOpacity style={styles.forgotButton}>
-                        <Text style={styles.forgotText}>¿Olvidaste tu contraseña?</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity
-                        style={styles.loginButton}
-                        onPress={handleLogin}
-                        disabled={loading}
-                    >
-                        {loading ? (
-                            <ActivityIndicator color="#fff" />
-                        ) : (
-                            <Text style={styles.loginButtonText}>INICIAR SESIÓN</Text>
-                        )}
-                    </TouchableOpacity>
-                </View>
-            </View>
+                </ScrollView>
+            </TouchableWithoutFeedback>
         </KeyboardAvoidingView>
     );
 };
-
+// ... styles unchanged
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#f5f7fa',
     },
-    contentContainer: {
-        flex: 1,
+    scrollContent: {
+        flexGrow: 1,
         justifyContent: 'center',
         paddingHorizontal: 30,
+        paddingVertical: 40,
     },
     logoContainer: {
         alignItems: 'center',
@@ -192,6 +220,9 @@ const styles = StyleSheet.create({
         shadowOpacity: 0.3,
         shadowRadius: 8,
         elevation: 5,
+    },
+    loginButtonDisabled: {
+        backgroundColor: '#a0c4eb',
     },
     loginButtonText: {
         color: '#fff',

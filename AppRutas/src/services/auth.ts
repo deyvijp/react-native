@@ -45,7 +45,7 @@ export const login = async (username: string, password: string): Promise<LoginRe
         }
     } catch (error: any) {
         // SECURITY: Do not log the error object if it might contain the password payload
-        console.error('Login Error: Connection failed or server error');
+        console.error('Login Error Detailed:', error);
         return {
             success: false,
             error: error.message || 'Error de conexión',
