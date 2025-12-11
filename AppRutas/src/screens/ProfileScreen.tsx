@@ -18,8 +18,8 @@ const ProfileScreen = ({ navigation, route }: Props) => {
         navigation.replace('Login');
     };
 
-    const MenuItem = ({ icon, label, isDestructive = false }: { icon: string; label: string; isDestructive?: boolean }) => (
-        <TouchableOpacity style={styles.menuItem}>
+    const MenuItem = ({ icon, label, onPress, isDestructive = false }: { icon: string; label: string; onPress?: () => void; isDestructive?: boolean }) => (
+        <TouchableOpacity style={styles.menuItem} onPress={onPress}>
             <View style={styles.menuIconContainer}>
                 <Ionicons name={icon as any} size={24} color="#4a90e2" />
             </View>
@@ -31,21 +31,27 @@ const ProfileScreen = ({ navigation, route }: Props) => {
     return (
         <SafeAreaView style={styles.container}>
             <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
-                    <Ionicons name="close" size={28} color="#333" />
-                </TouchableOpacity>
-                <View style={styles.profileHeader}>
-                    <View style={styles.avatarLarge}>
-                        <Text style={styles.avatarTextLarge}>{username.substring(0, 2).toUpperCase()}</Text>
-                        <View style={styles.statusDot} />
+                <View style={[styles.row, { justifyContent: 'space-between', alignItems: 'center' }]}>
+                    <View style={styles.profileHeader}>
+                        <View style={styles.avatarLarge}>
+                            <Text style={styles.avatarTextLarge}>{username.substring(0, 2).toUpperCase()}</Text>
+                            <View style={styles.statusDot} />
+                        </View>
+                        <Text style={styles.profileName}>{username}</Text>
                     </View>
-                    <Text style={styles.profileName}>{username}</Text>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.closeButton}>
+                        <Ionicons name="close" size={24} color="#666" />
+                    </TouchableOpacity>
                 </View>
             </View>
 
             <ScrollView style={styles.content}>
                 <View style={styles.card}>
-                    <MenuItem icon="person-outline" label="Datos personales" />
+                    <MenuItem
+                        icon="person-outline"
+                        label="Datos personales"
+                        onPress={() => navigation.navigate('PersonalData', { username })}
+                    />
                     <MenuItem icon="notifications-outline" label="Notificaciones" />
                     <MenuItem icon="eye-outline" label="Permisos de visibilidad" />
                     <MenuItem icon="finger-print-outline" label="Autenticación biométrica" />
@@ -69,14 +75,26 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#f5f7fa',
     },
+    row: {
+        flexDirection: 'row',
+    },
     header: {
-        padding: 20,
+        paddingHorizontal: 20,
+        paddingBottom: 30, // Breathing room below header
+        paddingTop: 10, // Minimal padding, let SafeAreaView handle the rest
         backgroundColor: '#fff',
-        paddingTop: 50, // Safe area compensation if needed
+        borderBottomLeftRadius: 24, // Modern rounded corners
+        borderBottomRightRadius: 24,
+        shadowColor: '#000', // Subtle shadow for depth
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.03,
+        shadowRadius: 10,
+        elevation: 3,
     },
     closeButton: {
-        alignSelf: 'flex-end',
         padding: 5,
+        backgroundColor: '#f0f0f0', // Optional: circle background for better touch target
+        borderRadius: 20,
     },
     profileHeader: {
         flexDirection: 'row',

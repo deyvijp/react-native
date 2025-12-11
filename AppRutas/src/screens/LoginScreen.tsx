@@ -16,6 +16,7 @@ import {
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/types';
 import { login } from '../services/auth';
+import { setSession } from '../services/session';
 
 type Props = {
     navigation: NativeStackNavigationProp<RootStackParamList, 'Login'>;
@@ -28,6 +29,10 @@ const LoginScreen = ({ navigation }: Props) => {
 
     // Reference to password input for focus chaining
     const passwordInputRef = useRef<TextInput>(null);
+
+
+
+    // ...
 
     const handleLogin = async () => {
         // Dismiss keyboard first for better UX
@@ -43,8 +48,9 @@ const LoginScreen = ({ navigation }: Props) => {
             const result = await login(email, password);
             setLoading(false);
 
-            if (result.success) {
-                // Alert.alert('Éxito', `Login correcto. UID: ${result.uid}`);
+            if (result.success && result.uid) {
+                // Initialize session
+                setSession(result.uid, result.username || email, password);
                 navigation.replace('Home', { username: result.username || 'Usuario' });
             } else {
                 Alert.alert('Error', result.error || 'Credenciales inválidas');
