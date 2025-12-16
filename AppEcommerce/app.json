@@ -1,0 +1,8 @@
+{
+  "name": "AppEcommerce",
+  "displayName": "AppEcommerce",
+  "expo": {
+    "name": "AppEcommerce",
+    "slug": "appecommerce"
+  }
+}
