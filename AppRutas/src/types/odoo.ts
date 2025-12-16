@@ -37,5 +37,9 @@ export interface LoginResult {
     success: boolean;
     uid?: number;
     username?: string;
+    sessionId?: string;
+    partnerId?: number;
+    userContext?: any;
+    companyId?: number;
     error?: string;
 }

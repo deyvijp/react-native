@@ -4,15 +4,15 @@ import { OdooRpcRequest, OdooRpcResponse, LoginResult } from '../types/odoo';
 export const login = async (username: string, password: string): Promise<LoginResult> => {
     // Remove trailing slash if present to avoid double slashes
     const baseUrl = ENV.ODOO_URL.replace(/\/$/, '');
-    const url = `${baseUrl}/jsonrpc`;
+    const url = `${baseUrl}/web/session/authenticate`;
 
-    const payload: OdooRpcRequest = {
+    const payload = {
         jsonrpc: '2.0',
         method: 'call',
         params: {
-            service: 'common',
-            method: 'login',
-            args: [ENV.ODOO_DB, username, password],
+            db: ENV.ODOO_DB,
+            login: username,
+            password: password,
         },
         id: Math.floor(Math.random() * 1000000000),
     };
@@ -26,25 +26,33 @@ export const login = async (username: string, password: string): Promise<LoginRe
             body: JSON.stringify(payload),
         });
 
-        const result: OdooRpcResponse<number | false> = await response.json();
+        const result = await response.json();
 
         if (result.error) {
-            throw new Error(result.error.data.message || result.error.message);
+            throw new Error(result.error.data?.message || result.error.message);
         }
 
-        // Odoo returns the UID (number) on success, or false (boolean) on failure
-        if (typeof result.result === 'number') {
+        if (result.result && result.result.uid) {
+            // Extract session_id from result if available (Odoo 10+)
+            const sessionId = result.result.session_id;
+
+            // Also try to get from header if needed, but result.session_id is reliable in JSON-RPC
+            // Note: fetch in RN might handle cookies automatically or not depending on networking stack.
+            // But we explicitly need the string for our manual headers.
+
             return {
                 success: true,
-                uid: result.result,
+                uid: result.result.uid,
                 username: username,
-                // SECURITY: Password is NOT returned or stored here
+                sessionId: sessionId,
+                partnerId: result.result.partner_id,
+                userContext: result.result.user_context,
+                companyId: result.result.company_id
             };
         } else {
             throw new Error('Credenciales inválidas');
         }
     } catch (error: any) {
-        // SECURITY: Do not log the error object if it might contain the password payload
         console.error('Login Error Detailed:', error);
         return {
             success: false,
